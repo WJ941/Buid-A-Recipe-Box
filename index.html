@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Build a Recipe Box</title>
+</head>
+<script src="scripts/vue.min.js"></script>
+<body>
+  <div id="app">
+    <ul>
+      <recipe-component v-for="recipe in recipes"
+                        :key="recipe.id"
+                        :recipe="recipe">
+        <!-- <ingredients-component v-for="(ingredient, index) in ingredients" 
+                                :key="index" 
+                                :ingredient="ingredient">                            
+        </ingredients-component> -->
+        <!-- <delete-recipe></delete-recipe>// 单个 reciep的delete方法 -->
+        <!-- <edit-recipe></edit-recipe>// 单个recipe的edit 方法 -->
+      </recipe-component>
+    </ul>
+  </div>
+</body>
+<script>
+  //  template recipe
+  // Vue.component('recipe-component',{
+  //   //选项
+  //   props: ['recipe', 'ingredients'],
+  //   template:`<div>
+  //               <h2>Ingredients</h2>
+  //               <p>{{recipe.name}}</p>
+  //           </div>`,
+  // })
+  // Vue.component('ingredients-component',{
+  //   //选项
+  //   props: ['ingredient'],
+  //   template:`<div>
+  //               {{ingredient}}
+  //             </div>`,
+  // })
+  var app = new Vue({
+    el: "#app",
+    data: {
+      // recipe: {
+      //   name:'',
+      //   ingredients:[]
+      // },
+      recipes:[
+        {
+          id: 1,
+          name:"Pumpkin Pie",
+          ingredients: ["Pumpkin Puree", 'Sweetened Condensed Milk', "Eggs", "Pumpkin Pie Spice", "Pie Crust"]
+        },
+        {
+          id: 2,
+          name:"Onion Pie",
+          ingredients: ["Pumpkin Puree", 'Sweetened Condensed Milk', "Eggs", "Pumpkin Pie Spice", "Pie Crust"]
+        },
+        {
+          name:"Spaghetti",
+          ingredients: ["Pumpkin Puree", 'Sweetened Condensed Milk', "Eggs", "Pumpkin Pie Spice", "Pie Crust"]
+        }
+      ]
+    },
+    // methods:{
+    //   displayIngredients: function(){}
+    // },
+    components: {
+      'recipe-component': {
+        //选项
+        props: ['recipe', 'ingredients'],
+        template:`<div>
+                    <p>{{recipe.name}}</p>
+                    <h2>Ingredients</h2>
+                </div>`,
+
+      }
+    }
+  })
+
+</script>
+</html>
