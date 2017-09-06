@@ -7,6 +7,13 @@
       "request": "launch",
       "sourceMaps": false,
       "file": "${workspaceRoot}/index.html"
+  },
+  {
+    "name": "Launch test.html (disable sourcemaps)",
+    "type": "chrome",
+    "request": "launch",
+    "sourceMaps": false,
+    "file": "${workspaceRoot}/test.html"
   }
   ]
 }

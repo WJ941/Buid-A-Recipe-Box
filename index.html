@@ -6,78 +6,208 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Build a Recipe Box</title>
 </head>
-<script src="scripts/vue.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/vue"></script>
+<style>
+  
+  #app {
+    width: 67%;
+    min-width: 768px;
+    margin: 40px auto;
+  }
+  .margintop {
+    margin-top: 10px;
+  }
+</style>
 <body>
   <div id="app">
-    <ul>
-      <recipe-component v-for="recipe in recipes"
-                        :key="recipe.id"
-                        :recipe="recipe">
-        <!-- <ingredients-component v-for="(ingredient, index) in ingredients" 
-                                :key="index" 
-                                :ingredient="ingredient">                            
-        </ingredients-component> -->
-        <!-- <delete-recipe></delete-recipe>// 单个 reciep的delete方法 -->
-        <!-- <edit-recipe></edit-recipe>// 单个recipe的edit 方法 -->
-      </recipe-component>
-    </ul>
+    <div id="accordion" role="tablist">
+      <recipe-item
+        v-for="(recipe,index) in recipes"
+        :key="recipe.id"
+        :id="recipe.id"
+        :name="recipe.name"
+        :href="recipe.href">
+
+        <ul class="list-group">
+          <li class="list-group-item" v-for="ingredient in recipe.ingredients">
+            {{ingredient}}
+          </li>
+        </ul>
+        <div class="margintop">
+          <button type="button" class="btn btn-success" data-toggle="modal" :data-target="recipe.editModalhref">Edit</button>
+          <button type="button" class="btn btn-danger" @click="deleteRecipe(index)">Delete</button>
+        </div>
+        <!-- ------edit modal---------- -->
+        <add-recipe-modal  :id="recipe.editModalId">
+          <editable-recipe slot="editableRecipe">
+              <input type="text" class="form-control" :id="recipe.editNameInput"  slot="recipename" :value="recipe.name">
+              <textarea class="form-control" :id="recipe.editInsInput" rows="3"  
+              slot="ingredients">{{ recipe.ingredients.join(',') }} </textarea>
+          </editable-recipe>
+          <button type="button" class="btn btn-primary" data-dismiss="modal" v-on:click="editRecipe(recipe)" slot="addRecipeBtn">Edit</button>
+        </add-recipe-modal>
+        <!-- ------edit modal---------- -->
+      </recipe-item>
+      <button type="button" class="btn btn-primary margintop"  data-toggle="modal" data-target="#addRecipe">Add a Recipe</button>
+    </div>
+
+      <!-- ---modal----- -->
+      <add-recipe-modal  id="addRecipe">
+        <editable-recipe slot="editableRecipe">
+            <input type="text" class="form-control" id="exampleFormControlInput1" placeholder="Recipe Name" slot="recipename" v-model="newRecipeName">
+            <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" placeholder="Enter ingredients,Seperated by commas" 
+            slot="ingredients" v-model="newIngredients"></textarea>
+        </editable-recipe>
+        <button type="button" class="btn btn-primary" v-on:click="addRecipe" slot="addRecipeBtn">Add Recipe</button>
+      </add-recipe-modal>
+
+
+
   </div>
 </body>
 <script>
-  //  template recipe
-  // Vue.component('recipe-component',{
-  //   //选项
-  //   props: ['recipe', 'ingredients'],
-  //   template:`<div>
-  //               <h2>Ingredients</h2>
-  //               <p>{{recipe.name}}</p>
-  //           </div>`,
-  // })
-  // Vue.component('ingredients-component',{
-  //   //选项
-  //   props: ['ingredient'],
-  //   template:`<div>
-  //               {{ingredient}}
-  //             </div>`,
-  // })
+  Vue.component('recipe-item',{
+    props: ["name","href","id"],
+    template: `
+      <div class="card">
+        <div class="card-header" role="tab" id="headingOne">
+          <h5 class="mb-0">
+            <a data-toggle="collapse" :href="href" aria-expanded="true" aria-controls="collapseOne">
+              {{name}}
+            </a>
+          </h5>
+        </div>
+    
+        <div :id="id" class="collapse " role="tabpanel" aria-labelledby="headingOne" data-parent="#accordion">
+          <div class="card-body">
+            <slot></slot>
+          </div>
+        </div>
+
+      </div>
+    `,
+  });
+  Vue.component('add-recipe-modal',{
+    template: `
+    <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+            <slot name="editableRecipe"></slot>
+            </div>
+            <div class="modal-footer">
+              <slot name="addRecipeBtn"></slot>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `,
+    methods: {
+      saveRecipe: function(){
+        this.$emit('add-recipe');
+      }
+    },
+  });
+  Vue.component('editable-recipe',{
+    template: `
+    <form>
+      <div class="form-group">
+        <label for="exampleFormControlInput1">Recipe</label>
+        <slot name="recipename"></slot>
+      </div>
+      <div class="form-group">
+        <label for="exampleFormControlTextarea1">Ingredients</label>
+        <slot name="ingredients"></slot>
+      </div>
+    </form>
+    `,
+  });
   var app = new Vue({
     el: "#app",
     data: {
-      // recipe: {
-      //   name:'',
-      //   ingredients:[]
-      // },
+      newRecipeName: '',
+      newIngredients: '',
       recipes:[
         {
           id: 1,
+          href: "#1",
           name:"Pumpkin Pie",
+          editModalId: '_1',
+          editModalhref:"#_1",
+          editNameInput: "editNameInput1",
+          editInsInput: "editInsInput1",
           ingredients: ["Pumpkin Puree", 'Sweetened Condensed Milk', "Eggs", "Pumpkin Pie Spice", "Pie Crust"]
         },
         {
           id: 2,
+          href: "#2",
           name:"Onion Pie",
+          editModalId: '_2',
+          editModalhref:"#_2",
+          
+          editNameInput: "editNameInput2",
+          editInsInput: "editInsInput2",
           ingredients: ["Pumpkin Puree", 'Sweetened Condensed Milk', "Eggs", "Pumpkin Pie Spice", "Pie Crust"]
         },
         {
+          id: 3,
+          href: "#3",
           name:"Spaghetti",
+          editModalId: '_3',
+          editModalhref:"#_3",
+          
+          editNameInput: "editNameInput3",
+          editInsInput: "editInsInput4",
           ingredients: ["Pumpkin Puree", 'Sweetened Condensed Milk', "Eggs", "Pumpkin Pie Spice", "Pie Crust"]
         }
       ]
     },
-    // methods:{
-    //   displayIngredients: function(){}
-    // },
-    components: {
-      'recipe-component': {
-        //选项
-        props: ['recipe', 'ingredients'],
-        template:`<div>
-                    <p>{{recipe.name}}</p>
-                    <h2>Ingredients</h2>
-                </div>`,
-
+    methods:{
+      editRecipe: function( recipe ){
+        var editedName = $("#" + recipe.editNameInput).val();console.log(editedName);
+        var editedIns = $( "#" + recipe.editInsInput).val();console.log(editedIns);
+        if( editedName ){
+          recipe.name = editedName;
+        }
+        if( editedIns ){
+          recipe.ingredients = editedIns.split(',');
+        }
+      },
+      deleteRecipe: function( index ){
+        this.recipes.splice( index,1);
+      },
+      addRecipe: function() {
+        var newIngredientsAry = this.newIngredients.split(',');
+        var that = this;
+        newRecipe = (function(){
+          var obj = {};
+          obj.id = that.recipes.length + 1;
+          obj.href = "#" + (that.recipes.length + 1);
+          obj.name = that.newRecipeName;
+          obj.editModalId = '_' + obj.id;
+          obj.editModalhref = "#" + obj.editModalId;
+          
+          obj.editNameInput= "editNameInput" + obj.id,
+          obj.editInsInput = "editInsInput" + obj.id,
+          obj.ingredients = newIngredientsAry;
+          return obj;
+        }());console.log(newRecipe);
+        this.recipes.push( newRecipe );
+        this.newRecipeName = "";
+        this.newIngredients = "";
       }
-    }
+    },
   })
 
 </script>
